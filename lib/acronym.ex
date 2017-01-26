@@ -10,7 +10,10 @@ defmodule Acronym do
   # end
 
   def abbreviate(phrase) do
-    Enum.join(abbreviate_list(String.split(phrase)))
+    phrase
+    |> String.split
+    |> abbreviate_list
+    |> Enum.join
   end
 
   defp abbreviate_list([]) do
@@ -22,8 +25,16 @@ defmodule Acronym do
   end
 
   defp abbreviate_word(word) do
-    word
-    |> String.capitalize
-    |> String.replace(~r/[a-z]/, "")
+    first_upcase_letter =
+      word
+      |> String.first
+      |> String.capitalize
+
+    other_upcase_letters =
+      word
+      |> String.slice(1..-1)
+      |> String.replace(~r/[^A-Z]/, "")
+
+    [first_upcase_letter, other_upcase_letters]
   end
 end
