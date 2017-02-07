@@ -13,7 +13,6 @@ defmodule Sublist do
   def compare(list_a, list_b) when length(list_a) < length(list_b) do
     compare_sublist(list_a, list_b)
   end
-
   def compare(list_a, list_b) do
     check_equality(list_a, list_b)
   end
