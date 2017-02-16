@@ -4,49 +4,44 @@ defmodule Frequency do
   end
 
   def frequency(texts, workers) do
-    worker_loads = texts
-      |> Enum.with_index
-      |> Enum.chunk_by(fn({element, index}) -> rem(index, workers) end)
-      |> Enum.map(
-        fn(list) ->
-          Enum.map(list, fn({e, _i}) ->
-            e
-          end)
-        end)
+    Agent.start(fn -> %{} end, name: __MODULE__)
 
-    worker_loads
+    divide_work(texts, workers)
     |> Enum.map(fn(load) ->
       Task.async(fn ->
-        do_frequency(Enum.join(load), %{})
+        do_frequency(Enum.join(load))
       end)
     end)
     |> Enum.map(&Task.await/1)
-    |> Enum.reduce(fn(map, acc) ->
-      Map.merge(map, acc, fn(_k, v1, v2) ->
-        v1 + v2
-      end)
-    end)
+
+    final_frequency = Agent.get(__MODULE__, fn(state) -> state end)
+    Agent.stop(__MODULE__)
+    final_frequency
   end
 
-  defp do_frequency(nil, acc), do: acc
-
-  defp do_frequency(text, acc) when is_binary(text) do
+  defp do_frequency(text) when is_binary(text) do
     text
     |> String.downcase
     |> String.replace(~r/[:!&@$%, 0-9^]/ , "")
     |> String.graphemes
-    |> do_frequency(acc)
+    |> do_frequency
   end
 
-  defp do_frequency([head | tail], acc) do
-    {_, updated_acc} = Map.get_and_update(acc, head, fn(value) ->
-      if value == nil, do: {value, 1}, else: {value, value + 1}
+  defp do_frequency([head | tail]) do
+    Agent.update(__MODULE__, fn(agent_data) ->
+      Map.update(agent_data, head, 1, fn(value) ->
+        value + 1
+      end)
     end)
 
-    do_frequency(tail, updated_acc)
+    do_frequency(tail)
   end
 
-  defp do_frequency([], acc) do
-    acc
+  defp do_frequency([]), do: nil
+  defp do_frequency(nil), do: nil
+
+  defp divide_work(texts, workers) do
+    work_size = round(Enum.count(texts) / workers) + 1
+    Enum.chunk(texts, work_size, work_size, [])
   end
 end

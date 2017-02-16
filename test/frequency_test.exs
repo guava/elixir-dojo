@@ -60,9 +60,19 @@ defmodule FrequencyTest do
     assert freq(List.duplicate("  ", 10000)) == %{}
   end
 
-  test "many times the same text gives a predictable result" do
-    assert freq(List.duplicate("abc", 1000))
-         == %{"a" => 1000, "b" => 1000, "c" => 1000}
+  test "many times the same text gives a predictable result (1)" do
+    assert freq(List.duplicate("abc", 100000), 1)
+         == %{"a" => 100000, "b" => 100000, "c" => 100000}
+  end
+
+  test "many times the same text gives a predictable result (4)" do
+    assert freq(List.duplicate("abc", 100000), 4)
+         == %{"a" => 100000, "b" => 100000, "c" => 100000}
+  end
+
+  test "many times the same text gives a predictable result (8)" do
+    assert freq(List.duplicate("abc", 100000))
+         == %{"a" => 100000, "b" => 100000, "c" => 100000}
   end
 
   test "punctuation doesn't count" do
