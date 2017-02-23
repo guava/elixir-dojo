@@ -84,3 +84,4 @@ defmodule SublistTest do
     assert Sublist.compare([1,2,1,2,3], [1,2,3,1,2,3,2,3,2,1]) == :unequal
   end
 end
+
